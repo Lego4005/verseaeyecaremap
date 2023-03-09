@@ -52,7 +52,7 @@ map.on('click', (event) => {
 const popup = new mapboxgl.Popup({ offset: [0, -15] })
   .setLngLat(feature.geometry.coordinates)
   .setHTML(
-    `<h3>${feature.properties.equity&group}</h3><p>${feature.properties.name}</p><p>${feature.properties.location}</p><p>${feature.properties.address}</p><p>${feature.properties.city}</p><p>${feature.properties.state}</p><p>${feature.properties.zip}</p>`
+    `<h3>${feature.properties.equity_group}</h3><p>${feature.properties.name}</p><p>${feature.properties.location}</p><p>${feature.properties.address}</p><p>${feature.properties.city}</p><p>${feature.properties.state}</p><p>${feature.properties.zip}</p>`
   )
   .addTo(map);
 });
