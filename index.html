@@ -69,12 +69,45 @@ map.on('load', () => {
   ];
 
   const labels = [
-    'Jake',
-    'Tyler',
-    'Colby',
-    'Rebecca',
-    'Sean',
+    'San Francisco',
+    'New York City',
+    'Washington, D.C.',
+    'Philadelphia',
+    'Los Angeles',
   ];
+
+  const floridaGeoJSON = {
+    'type': 'Feature',
+    'geometry': {
+      'type': 'Polygon',
+      'coordinates': [
+        [
+          [-87.634896, 30.866731],
+          [-80.031362, 30.866731],
+          [-80.031362, 24.396308],
+          [-87.634896, 24.396308],
+          [-87.634896, 30.866731],
+        ],
+      ],
+    },
+  };
+
+  // Add a layer for Florida's outline
+  map.addSource('florida', {
+    'type': 'geojson',
+    'data': floridaGeoJSON,
+  });
+
+  map.addLayer({
+    'id': 'florida-outline',
+    'type': 'line',
+    'source': 'florida',
+    'layout': {},
+    'paint': {
+      'line-color': 'rgba(255, 165, 0, 0.4)',
+      'line-width': 4,
+    },
+  });
 
   // Add circles and labels to the map for each point
   points.forEach((point, index) => {
@@ -89,9 +122,9 @@ map.on('load', () => {
           'coordinates': point
         },
         'properties': {
-          'label': labels[index]
-        }
-      }
+          'label': labels[index],
+        },
+      },
     });
 
     map.addLayer({
@@ -104,10 +137,10 @@ map.on('load', () => {
           'base': 10,
           'stops': [
             [1, 25],
-            [10, 80467]
-          ]
-        }
-      }
+            [10, 80467],
+          ],
+        },
+      },
     });
 
     map.addLayer({
@@ -119,11 +152,11 @@ map.on('load', () => {
         'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
         'text-size': 14,
         'text-anchor': 'top',
-        'text-offset': [0, 1]
+        'text-offset': [0, 1],
       },
       'paint': {
-        'text-color': '#000'
-      }
+        'text-color': '#000',
+      },
     });
   });
 });
