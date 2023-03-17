@@ -60,26 +60,64 @@
 
       map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
 
-      function addSymbolsLayer() {
-        const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
-        const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
+      const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
 
-        equityGroups.forEach(equityGroup => {
-          const newLayer = {
-            ...symbolsLayer,
-            id: `symbols-${equityGroup}`,
-            filter: ['==', ['get', 'Equity Group'], equityGroup]
-          };
-          map.addLayer(newLayer);
-        });
-      }
+const equityGroupStyles = {
+  AEG: {
+    color: '#F44336', // red
+    filter: ['==', ['get', 'Equity Group'], 'AEG'],
+  },
+  ECP: {
+    color: '#4CAF50', // green
+    filter: ['==', ['get', 'Equity Group'], 'ECP'],
+  },
+  ESP: {
+    color: '#800080', // purple
+    filter: ['==', ['get', 'Equity Group'], 'ESP'],
+  },
+  BCP: {
+    color: '#FFC107', // amber
+    filter: ['==', ['get', 'Equity Group'], 'BCP'],
+  },
+  ECSP: {
+    color: '#9C27B0', // deep purple
+    filter: ['==', ['get', 'Equity Group'], 'ECSP'],
+  },
+  WPO: {
+    color: '#FF5722', // deep orange
+    filter: ['==', ['get', 'Equity Group'], 'WPO'],
+  },
+};
 
-      function switchStyle(style) {
-        map.setStyle(style);
-        map.once('style.load', () => {
-          addSymbolsLayer();
-        });
-      }
+function addSymbolsLayer(style) {
+  equityGroups.forEach(equityGroup => {
+    const equityGroupStyle = equityGroupStyles[equityGroup];
+    const newLayer = {
+      id: `symbols-${equityGroup}`,
+      type: 'symbol',
+      source: 'points',
+      filter: equityGroupStyle.filter,
+      layout: {
+        'text-field': '{Name}',
+        'text-font': ['Open Sans Regular'],
+        'text-size': 14,
+        'text-offset': [0, 0.5],
+        'text-anchor': 'top',
+      },
+      paint: {
+        'text-color': equityGroupStyle.color,
+      },
+    };
+    map.addLayer(newLayer);
+  });
+}
+
+function switchStyle(style) {
+  map.setStyle(style);
+  map.once('style.load', () => {
+    addSymbolsLayer(style);
+  });
+}
 
       document.getElementById('style-selector').addEventListener('change', (event) => {
         switchStyle(event.target.value);
