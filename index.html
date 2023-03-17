@@ -22,6 +22,14 @@
   <body>
     <div id='map'></div>
     <div style="position: absolute; z-index: 1; padding: 10px;">
+      <select id="style-selector">
+        <option value="mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip">Custom Style</option>
+        <option value="mapbox://styles/mapbox/streets-v11">Streets</option>
+        <option value="mapbox://styles/mapbox/satellite-v9">Satellite</option>
+      </select>
+      <!-- Add the rest of your UI elements here -->
+    </div>
+    <div style="position: absolute; z-index: 1; padding: 10px;">
       <div style="display: flex; flex-direction: column;">
         <label style="display: flex; align-items: center;">
           <input type="checkbox" class="equity-toggle" value="AEG" checked>
@@ -57,16 +65,41 @@
     </div>
     
     <script>
-      mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig'; 
+      mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig';
       const map = new mapboxgl.Map({
         container: 'map',
-        style: 'mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip', 
+        style: 'mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip',
         center: [0, 0],
         zoom: 1
       });
-  
-      // Fly to the United States when the map is first loaded
+
       map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
+
+      function addSymbolsLayer() {
+        const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
+        const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
+
+        equityGroups.forEach(equityGroup => {
+          const newLayer = {
+            ...symbolsLayer,
+            id: `symbols-${equityGroup}`,
+            filter: ['==', ['get', 'Equity Group'], equityGroup]
+          };
+          map.addLayer(newLayer);
+        });
+      }
+
+      function switchStyle(style) {
+        map.setStyle(style);
+        map.once('style.load', () => {
+          addSymbolsLayer();
+        });
+      }
+
+      document.getElementById('style-selector').addEventListener('change', (event) => {
+        switchStyle(event.target.value);
+      });
+
   
       function setEquityGroupVisibility(equityGroup, isVisible) {
         const visibility = isVisible ? 'visible' : 'none';
@@ -115,7 +148,7 @@
   const equityGroupColors = {
     AEG: '#F44336', // red
     ECP: '#4CAF50', // green
-    ESP: '#2196F3', // blue
+    ESP: '#800080', // blue
     BCP: '#FFC107', // amber
     ECSP: '#9C27B0', // purple
     WPO: '#FF5722', // deep orange
