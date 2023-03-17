@@ -31,6 +31,8 @@
       center: [-89.773957, 36.376642],
       zoom: 1.37
     });
+    // Fly to the United States when the map is first loaded
+    map.flyTo({ center: [-95, 37], zoom: 3 });
 /* 
 Add an event listener that runs
   when a user clicks on the map element.
@@ -57,21 +59,6 @@ const popup = new mapboxgl.Popup({ offset: [0, -15] })
   .addTo(map);
 });
 
-let isAtStart = true;
- 
-document.getElementById('fly').addEventListener('click', () => {
-// depending on whether we're currently at point a or b,
-// aim for point a or b
-const target = isAtStart ? end : start;
-isAtStart = !isAtStart;
- 
-map.flyTo({
-...target, // Fly to the selected target
-duration: 12000, // Animate over 12 seconds
-essential: true // This animation is considered essential with
-//respect to prefers-reduced-motion
-});
-});
 
     </script>
   </body>
