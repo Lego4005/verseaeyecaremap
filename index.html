@@ -59,6 +59,7 @@ const popup = new mapboxgl.Popup({ offset: [0, -15] })
   .addTo(map);
 });
 
+map.on('load', () => {
 const points = [
       [-122.4194, 37.7749],
       [-74.0059, 40.7128],
@@ -93,6 +94,7 @@ const points = [
         }
       });
     });
+  });
 
 
     </script>
