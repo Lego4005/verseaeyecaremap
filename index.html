@@ -132,36 +132,32 @@
         });
 
      // Add event listeners for mouse events on the map
-     map.on('mouseenter', 'symbols', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
+     equityGroups.forEach(equityGroup => {
+  map.on('mouseenter', `symbols-${equityGroup}`, (e) => {
+    map.getCanvas().style.cursor = 'pointer';
 
-        const coordinates = e.features[0].geometry.coordinates.slice();
-        const feature = e.features[0];
-        const description = `<h3>${feature.properties.Name}</h3>
-        <p>Equity Group: ${feature.properties["Equity Group"]}</p>
-        <p>Location: ${feature.properties.Location}</p>
-        <p>Address: ${feature.properties.Address}</p>
-        <p>City: ${feature.properties.City}</p>
-        <p>State: ${feature.properties.State}</p>
-        <p>Zip: ${feature.properties.Zip}</p>`;
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const feature = e.features[0];
+    const description = `<h3>${feature.properties.Name}</h3>
+    <p>Equity Group: ${feature.properties["Equity Group"]}</p>
+    <p>Location: ${feature.properties.Location}</p>
+    <p>Address: ${feature.properties.Address}</p>
+    <p>City: ${feature.properties.City}</p>
+    <p>State: ${feature.properties.State}</p>
+    <p>Zip: ${feature.properties.Zip}</p>`;
 
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
 
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
+    popup.setLngLat(coordinates).setHTML(description).addTo(map);
+  });
 
-        // Populate the popup and set its coordinates
-        // based on the feature found.
-        popup.setLngLat(coordinates).setHTML(description).addTo(map);
-      });
-
-      map.on('mouseleave', 'symbols', () => {
-        map.getCanvas().style.cursor = '';
-        popup.remove();
-      });
+  map.on('mouseleave', `symbols-${equityGroup}`, () => {
+    map.getCanvas().style.cursor = '';
+    popup.remove();
+  });
+});
 
       // Call the function when the map is loaded
       updateEquityGroupTotals();
