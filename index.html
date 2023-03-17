@@ -59,6 +59,41 @@ const popup = new mapboxgl.Popup({ offset: [0, -15] })
   .addTo(map);
 });
 
+const points = [
+      [-122.4194, 37.7749],
+      [-74.0059, 40.7128],
+      [-77.0369, 38.9072],
+      [-75.1652, 39.9526],
+      [-118.2437, 34.0522],
+    ];
+
+    // Add circles to the map for each point
+    points.forEach(point => {
+      map.addSource(point.toString(), {
+        'type': 'geojson',
+        'data': {
+          'type': 'Point',
+          'coordinates': point
+        }
+      });
+
+      map.addLayer({
+        'id': point.toString(),
+        'type': 'circle',
+        'source': point.toString(),
+        'paint': {
+          'circle-color': 'rgba(255, 255, 255, 0.4)',
+          'circle-radius': {
+            'base': 10,
+            'stops': [
+              [0, 0],
+              [10, 16093.4] // 100 miles in meters
+            ]
+          }
+        }
+      });
+    });
+
 
     </script>
   </body>
