@@ -21,6 +21,12 @@
   </head>
   <body>
     <div id='map'></div>
+    <div style="position: absolute; z-index: 1; padding: 10px;">
+      <label>
+        <input type="checkbox" id="equity-toggle" checked>
+        Toggle Equity Group
+      </label>
+    </div>
     <script>
     // The value for 'accessToken' begins with 'pk...'
     mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig'; 
@@ -33,6 +39,20 @@
     });
     // Fly to the United States when the map is first loaded
     map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
+
+    document.getElementById('equity-toggle').addEventListener('change', (event) => {
+  const isChecked = event.target.checked;
+  const visibility = isChecked ? 'visible' : 'none';
+
+  points.forEach((point) => {
+    const pointID = point.toString();
+    const circleLayerID = `${pointID}-circle`;
+    const labelLayerID = `${pointID}-label`;
+
+    map.setLayoutProperty(circleLayerID, 'visibility', visibility);
+    map.setLayoutProperty(labelLayerID, 'visibility', visibility);
+  });
+});
 /* 
 Add an event listener that runs
   when a user clicks on the map element.
@@ -76,39 +96,6 @@ map.on('load', () => {
     'Los Angeles',
   ];
 
-  const floridaGeoJSON = {
-    'type': 'Feature',
-    'geometry': {
-      'type': 'Polygon',
-      'coordinates': [
-        [
-          [-87.634896, 30.866731],
-          [-80.031362, 30.866731],
-          [-80.031362, 24.396308],
-          [-87.634896, 24.396308],
-          [-87.634896, 30.866731],
-        ],
-      ],
-    },
-  };
-
-  // Add a layer for Florida's outline
-  map.addSource('florida', {
-    'type': 'geojson',
-    'data': floridaGeoJSON,
-  });
-
-  map.addLayer({
-    'id': 'florida-outline',
-    'type': 'line',
-    'source': 'florida',
-    'layout': {},
-    'paint': {
-      'line-color': 'rgba(255, 165, 0, 0.4)',
-      'line-width': 4,
-    },
-  });
-
   // Add circles and labels to the map for each point
   points.forEach((point, index) => {
     const pointID = point.toString();
@@ -122,9 +109,9 @@ map.on('load', () => {
           'coordinates': point
         },
         'properties': {
-          'label': labels[index],
-        },
-      },
+          'label': labels[index]
+        }
+      }
     });
 
     map.addLayer({
@@ -137,10 +124,10 @@ map.on('load', () => {
           'base': 10,
           'stops': [
             [1, 25],
-            [10, 80467],
-          ],
-        },
-      },
+            [10, 80467]
+          ]
+        }
+      }
     });
 
     map.addLayer({
@@ -152,11 +139,11 @@ map.on('load', () => {
         'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
         'text-size': 14,
         'text-anchor': 'top',
-        'text-offset': [0, 1],
+        'text-offset': [0, 1]
       },
       'paint': {
-        'text-color': '#000',
-      },
+        'text-color': '#000'
+      }
     });
   });
 });
