@@ -30,133 +30,66 @@
         <input type="checkbox" class="equity-toggle" value="ECP" checked>
         ECP
       </label>
-      <!-- Add more checkboxes for other equity groups -->
+      <label>
+        <input type="checkbox" class="equity-toggle" value="ESP" checked>
+        ESP
+      </label>
+      <label>
+        <input type="checkbox" class="equity-toggle" value="BCP" checked>
+        BCP
+      </label>
+      <label>
+        <input type="checkbox" class="equity-toggle" value="ECSP" checked>
+        ECSP
+      </label>
+      <label>
+        <input type="checkbox" class="equity-toggle" value="WPO" checked>
+        WPO
+      </label>
     </div>
     <script>
-    // The value for 'accessToken' begins with 'pk...'
     mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig'; 
     const map = new mapboxgl.Map({
       container: 'map',
-      // Replace YOUR_STYLE_URL with your style URL.
       style: 'mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip', 
       center: [0, 0],
       zoom: 1
     });
+
     // Fly to the United States when the map is first loaded
     map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
 
     function setEquityGroupVisibility(equityGroup, isVisible) {
-  const visibility = isVisible ? 'visible' : 'none';
-
-  const features = map.queryRenderedFeatures({ layers: ['symbols'] });
-
-  features.forEach((feature) => {
-    const pointID = feature.geometry.coordinates.toString();
-    const circleLayerID = `${pointID}-circle`;
-    const labelLayerID = `${pointID}-label`;
-
-    if (feature.properties["Equity Group"] === equityGroup) {
-      map.setLayoutProperty(circleLayerID, 'visibility', visibility);
-      map.setLayoutProperty(labelLayerID, 'visibility', visibility);
+      const visibility = isVisible ? 'visible' : 'none';
+      map.setLayoutProperty(`symbols-${equityGroup}`, 'visibility', visibility);
     }
-  });
-}
-/* 
-Add an event listener that runs
-  when a user clicks on the map element.
-*/
-map.on('click', (event) => {
-  // If the user clicked on one of your markers, get its information.
-  const features = map.queryRenderedFeatures(event.point, {
-    layers: ['symbols'] // replace with your layer name
-  });
-  if (!features.length) {
-    return;
-  }
-  const feature = features[0];
 
-  /* 
-    Create a popup, specify its options 
-    and properties, and add it to the map.
-  */
-const popup = new mapboxgl.Popup({ offset: [0, -15] })
-  .setLngLat(feature.geometry.coordinates)
-  .setHTML(
-    `<h3>${feature.properties.Name}</h3><p>Equity Group: ${feature.properties["Equity Group"]}<p>Location: ${feature.properties.Location}</p><p>Address: ${feature.properties.Address}</p><p>City:${feature.properties.City}</p><p>State: ${feature.properties.State}</p><p>Zip: ${feature.properties.Zip}</p>`
-  )
-  .addTo(map);
-});
-
-map.on('load', () => {
-  const points = [
-    [-122.4194, 37.7749],
-    [-74.0059, 40.7128],
-    [-77.0369, 38.9072],
-    [-75.1652, 39.9526],
-    [-118.2437, 34.0522],
-  ];
-
-  const labels = [
-    'San Francisco',
-    'New York City',
-    'Washington, D.C.',
-    'Philadelphia',
-    'Los Angeles',
-  ];
-
-  // Add circles and labels to the map for each point
-  points.forEach((point, index) => {
-    const pointID = point.toString();
-
-    map.addSource(pointID, {
-      'type': 'geojson',
-      'data': {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'Point',
-          'coordinates': point
-        },
-        'properties': {
-          'label': labels[index]
-        }
-      }
+    // Add event listeners for checkboxes
+    document.querySelectorAll('.equity-toggle').forEach((checkbox) => {
+      checkbox.addEventListener('change', (event) => {
+        setEquityGroupVisibility(event.target.value, event.target.checked);
+      });
     });
 
-    map.addLayer({
-      'id': `${pointID}-circle`,
-      'type': 'circle',
-      'source': pointID,
-      'paint': {
-        'circle-color': 'rgba(255, 165, 0, 0.4)',
-        'circle-radius': {
-          'base': 10,
-          'stops': [
-            [1, 25],
-            [10, 80467]
-          ]
-        }
-      }
+    map.on('load', () => {
+      // Get the existing symbol layer from the style
+      const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
+      
+      const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
+
+      equityGroups.forEach(equityGroup => {
+        // Duplicate the symbol layer and apply a filter for each Equity Group
+        const newLayer = {
+          ...symbolsLayer,
+          id: `symbols-${equityGroup}`,
+          filter: ['==', ['get', 'Equity Group'], equityGroup]
+        };
+
+        // Remove the original layer and add the new filtered layers
+        map.removeLayer('symbols');
+        map.addLayer(newLayer);
+      });
     });
-
-    map.addLayer({
-      'id': `${pointID}-label`,
-      'type': 'symbol',
-      'source': pointID,
-      'layout': {
-        'text-field': ['get', 'label'],
-        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-size': 14,
-        'text-anchor': 'top',
-        'text-offset': [0, 1]
-      },
-      'paint': {
-        'text-color': '#000'
-      }
-    });
-  });
-});
-
-
     </script>
   </body>
 </html>
