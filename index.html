@@ -22,31 +22,40 @@
   <body>
     <div id='map'></div>
     <div style="position: absolute; z-index: 1; padding: 10px;">
-      <label>
-        <input type="checkbox" class="equity-toggle" value="AEG" checked>
-        AEG
-      </label>
-      <label>
-        <input type="checkbox" class="equity-toggle" value="ECP" checked>
-        ECP
-      </label>
-      <label>
-        <input type="checkbox" class="equity-toggle" value="ESP" checked>
-        ESP
-      </label>
-      <label>
-        <input type="checkbox" class="equity-toggle" value="BCP" checked>
-        BCP
-      </label>
-      <label>
-        <input type="checkbox" class="equity-toggle" value="ECSP" checked>
-        ECSP
-      </label>
-      <label>
-        <input type="checkbox" class="equity-toggle" value="WPO" checked>
-        WPO
-      </label>
+      <div style="display: flex; flex-direction: column;">
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" class="equity-toggle" value="AEG" checked>
+          <span>AEG</span>
+          <span style="margin-left: auto;">Total: <span id="total-AEG">0</span></span>
+        </label>
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" class="equity-toggle" value="ECP" checked>
+          <span>ECP</span>
+          <span style="margin-left: auto;">Total: <span id="total-ECP">0</span></span>
+        </label>
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" class="equity-toggle" value="ESP" checked>
+          <span>ESP</span>
+          <span style="margin-left: auto;">Total: <span id="total-ESP">0</span></span>
+        </label>
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" class="equity-toggle" value="BCP" checked>
+          <span>BCP</span>
+          <span style="margin-left: auto;">Total: <span id="total-BCP">0</span></span>
+        </label>
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" class="equity-toggle" value="ECSP" checked>
+          <span>ECSP</span>
+          <span style="margin-left: auto;">Total: <span id="total-ECSP">0</span></span>
+        </label>
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" class="equity-toggle" value="WPO" checked>
+          <span>WPO</span>
+          <span style="margin-left: auto;">Total: <span id="total-WPO">0</span></span>
+        </label>
+      </div>
     </div>
+    
     <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig'; 
     const map = new mapboxgl.Map({
@@ -68,8 +77,34 @@
     document.querySelectorAll('.equity-toggle').forEach((checkbox) => {
       checkbox.addEventListener('change', (event) => {
         setEquityGroupVisibility(event.target.value, event.target.checked);
+        updateEquityGroupTotals();
       });
     });
+
+    function updateEquityGroupTotals() {
+  const equityGroups = ["AEG", "ECP", "ESP", "BCP", "ECSP", "WPO"];
+  const equityGroupCounts = {};
+
+  // Initialize counts
+  equityGroups.forEach(group => {
+    equityGroupCounts[group] = 0;
+  });
+
+  // Count occurrences of each equity group in the features
+  const features = map.queryRenderedFeatures({ layers: ["symbols"] });
+  features.forEach(feature => {
+    const equityGroup = feature.properties["Equity Group"];
+    if (equityGroupCounts.hasOwnProperty(equityGroup)) {
+      equityGroupCounts[equityGroup]++;
+    }
+  });
+
+  // Update the totals on the HTML elements
+  equityGroups.forEach(group => {
+    document.getElementById(`total-${group}`).innerText = equityGroupCounts[group];
+  });
+}
+
 
     map.on('load', () => {
       // Get the existing symbol layer from the style
@@ -89,6 +124,7 @@
         map.removeLayer('symbols');
         map.addLayer(newLayer);
       });
+      updateEquityGroupTotals();
     });
     </script>
   </body>
