@@ -48,26 +48,19 @@
     function setEquityGroupVisibility(equityGroup, isVisible) {
   const visibility = isVisible ? 'visible' : 'none';
 
-  points.forEach((point, index) => {
-    const pointID = point.toString();
+  const features = map.queryRenderedFeatures({ layers: ['symbols'] });
+
+  features.forEach((feature) => {
+    const pointID = feature.geometry.coordinates.toString();
     const circleLayerID = `${pointID}-circle`;
     const labelLayerID = `${pointID}-label`;
 
-    // Assuming the feature.properties["Equity Group"] values are in the same order as the points array
-    if (labels[index] === equityGroup) {
+    if (feature.properties["Equity Group"] === equityGroup) {
       map.setLayoutProperty(circleLayerID, 'visibility', visibility);
       map.setLayoutProperty(labelLayerID, 'visibility', visibility);
     }
   });
 }
-
-document.querySelectorAll('.equity-toggle').forEach((checkbox) => {
-  checkbox.addEventListener('change', (event) => {
-    const equityGroup = event.target.value;
-    const isChecked = event.target.checked;
-    setEquityGroupVisibility(equityGroup, isChecked);
-  });
-});
 /* 
 Add an event listener that runs
   when a user clicks on the map element.
