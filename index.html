@@ -106,26 +106,34 @@
 }
 
 
-    map.on('load', () => {
-      // Get the existing symbol layer from the style
-      const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
-      
-      const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
+map.on('load', () => {
+  // Get the existing symbol layer from the style
+  const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
+  
+  const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
 
-      equityGroups.forEach(equityGroup => {
-        // Duplicate the symbol layer and apply a filter for each Equity Group
-        const newLayer = {
-          ...symbolsLayer,
-          id: `symbols-${equityGroup}`,
-          filter: ['==', ['get', 'Equity Group'], equityGroup]
-        };
+  equityGroups.forEach(equityGroup => {
+    // Duplicate the symbol layer and apply a filter for each Equity Group
+    const newLayer = {
+      ...symbolsLayer,
+      id: `symbols-${equityGroup}`,
+      filter: ['==', ['get', 'Equity Group'], equityGroup]
+    };
 
-        // Remove the original layer and add the new filtered layers
-        map.removeLayer('symbols');
-        map.addLayer(newLayer);
-      });
-      updateEquityGroupTotals();
-    });
+    // Remove the original layer and add the new filtered layers
+    map.removeLayer('symbols');
+    map.addLayer(newLayer);
+  });
+  
+  // Call the function when the map is loaded
+  updateEquityGroupTotals();
+});
+
+// Listen for the 'styledata' event to handle updates when the map's style changes
+map.on('styledata', () => {
+  updateEquityGroupTotals();
+});
+
     </script>
   </body>
 </html>
