@@ -29,7 +29,7 @@
       // Replace YOUR_STYLE_URL with your style URL.
       style: 'mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip', 
       center: [-89.773957, 36.376642],
-      zoom: 5.37
+      zoom: 1.37
     });
 /* 
 Add an event listener that runs
@@ -55,6 +55,22 @@ const popup = new mapboxgl.Popup({ offset: [0, -15] })
     `<h3>${feature.properties.Name}</h3><p>Equity Group: ${feature.properties["Equity Group"]}<p>Location: ${feature.properties.Location}</p><p>Address: ${feature.properties.Address}</p><p>City:${feature.properties.City}</p><p>State: ${feature.properties.State}</p><p>Zip: ${feature.properties.Zip}</p>`
   )
   .addTo(map);
+});
+
+let isAtStart = true;
+ 
+document.getElementById('fly').addEventListener('click', () => {
+// depending on whether we're currently at point a or b,
+// aim for point a or b
+const target = isAtStart ? end : start;
+isAtStart = !isAtStart;
+ 
+map.flyTo({
+...target, // Fly to the selected target
+duration: 12000, // Animate over 12 seconds
+essential: true // This animation is considered essential with
+//respect to prefers-reduced-motion
+});
 });
 
     </script>
