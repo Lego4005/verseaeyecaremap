@@ -136,7 +136,15 @@
         map.getCanvas().style.cursor = 'pointer';
 
         const coordinates = e.features[0].geometry.coordinates.slice();
-        const description = e.features[0].properties.description;
+        const feature = e.features[0];
+        const description = `<h3>${feature.properties.Name}</h3>
+        <p>Equity Group: ${feature.properties["Equity Group"]}</p>
+        <p>Location: ${feature.properties.Location}</p>
+        <p>Address: ${feature.properties.Address}</p>
+        <p>City: ${feature.properties.City}</p>
+        <p>State: ${feature.properties.State}</p>
+        <p>Zip: ${feature.properties.Zip}</p>`;
+
 
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
