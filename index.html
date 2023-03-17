@@ -121,7 +121,7 @@ map.on('load', () => {
     };
 
     // Remove the original layer and add the new filtered layers
-    map.removeLayer('symbols');
+    map.setLayoutProperty('symbols', 'visibility', 'none');
     map.addLayer(newLayer);
   });
   
@@ -130,9 +130,10 @@ map.on('load', () => {
 });
 
 // Listen for the 'styledata' event to handle updates when the map's style changes
-map.on('styledata', () => {
+map.on('idle', () => {
   updateEquityGroupTotals();
 });
+
 
     </script>
   </body>
