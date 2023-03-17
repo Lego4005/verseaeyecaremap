@@ -60,41 +60,73 @@ const popup = new mapboxgl.Popup({ offset: [0, -15] })
 });
 
 map.on('load', () => {
-const points = [
-      [-122.4194, 37.7749],
-      [-74.0059, 40.7128],
-      [-77.0369, 38.9072],
-      [-75.1652, 39.9526],
-      [-118.2437, 34.0522],
-    ];
+  const points = [
+    [-122.4194, 37.7749],
+    [-74.0059, 40.7128],
+    [-77.0369, 38.9072],
+    [-75.1652, 39.9526],
+    [-118.2437, 34.0522],
+  ];
 
-    // Add circles to the map for each point
-    points.forEach(point => {
-      map.addSource(point.toString(), {
-        'type': 'geojson',
-        'data': {
+  const labels = [
+    'Jake',
+    'Tyler',
+    'Colby',
+    'Rebecca',
+    'Sean',
+  ];
+
+  // Add circles and labels to the map for each point
+  points.forEach((point, index) => {
+    const pointID = point.toString();
+
+    map.addSource(pointID, {
+      'type': 'geojson',
+      'data': {
+        'type': 'Feature',
+        'geometry': {
           'type': 'Point',
           'coordinates': point
+        },
+        'properties': {
+          'label': labels[index]
         }
-      });
+      }
+    });
 
-      map.addLayer({
-        'id': point.toString(),
-        'type': 'circle',
-        'source': point.toString(),
-        'paint': {
-          'circle-color': 'rgba(255, 165, 0, 0.4)',
-          'circle-radius': {
-            'base': 10,
-            'stops': [
-              [1, 25],
-              [10, 80467] // 100 miles in meters
-            ]
-          }
+    map.addLayer({
+      'id': `${pointID}-circle`,
+      'type': 'circle',
+      'source': pointID,
+      'paint': {
+        'circle-color': 'rgba(255, 165, 0, 0.4)',
+        'circle-radius': {
+          'base': 10,
+          'stops': [
+            [1, 25],
+            [10, 80467]
+          ]
         }
-      });
+      }
+    });
+
+    map.addLayer({
+      'id': `${pointID}-label`,
+      'type': 'symbol',
+      'source': pointID,
+      'layout': {
+        'text-field': ['get', 'label'],
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': 14,
+        'text-anchor': 'top',
+        'text-offset': [0, 1]
+      },
+      'paint': {
+        'text-color': '#000'
+      }
     });
   });
+});
 
 
     </script>
