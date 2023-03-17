@@ -23,9 +23,14 @@
     <div id='map'></div>
     <div style="position: absolute; z-index: 1; padding: 10px;">
       <label>
-        <input type="checkbox" id="equity-toggle" checked>
-        Toggle Equity Group
+        <input type="checkbox" class="equity-toggle" value="AEG" checked>
+        AEG
       </label>
+      <label>
+        <input type="checkbox" class="equity-toggle" value="ECP" checked>
+        ECP
+      </label>
+      <!-- Add more checkboxes for other equity groups -->
     </div>
     <script>
     // The value for 'accessToken' begins with 'pk...'
@@ -40,17 +45,27 @@
     // Fly to the United States when the map is first loaded
     map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
 
-    document.getElementById('equity-toggle').addEventListener('change', (event) => {
-  const isChecked = event.target.checked;
-  const visibility = isChecked ? 'visible' : 'none';
+    function setEquityGroupVisibility(equityGroup, isVisible) {
+  const visibility = isVisible ? 'visible' : 'none';
 
-  points.forEach((point) => {
+  points.forEach((point, index) => {
     const pointID = point.toString();
     const circleLayerID = `${pointID}-circle`;
     const labelLayerID = `${pointID}-label`;
 
-    map.setLayoutProperty(circleLayerID, 'visibility', visibility);
-    map.setLayoutProperty(labelLayerID, 'visibility', visibility);
+    // Assuming the feature.properties["Equity Group"] values are in the same order as the points array
+    if (labels[index] === equityGroup) {
+      map.setLayoutProperty(circleLayerID, 'visibility', visibility);
+      map.setLayoutProperty(labelLayerID, 'visibility', visibility);
+    }
+  });
+}
+
+document.querySelectorAll('.equity-toggle').forEach((checkbox) => {
+  checkbox.addEventListener('change', (event) => {
+    const equityGroup = event.target.value;
+    const isChecked = event.target.checked;
+    setEquityGroupVisibility(equityGroup, isChecked);
   });
 });
 /* 
