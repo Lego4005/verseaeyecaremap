@@ -107,23 +107,36 @@
       }
   
       map.on('load', () => {
-        // Get the existing symbol layer from the style
-        const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
-        
-        const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
+  // Get the existing symbol layer from the style
+  const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
   
-        equityGroups.forEach(equityGroup => {
-          // Duplicate the symbol layer and apply a filter for each Equity Group
-          const newLayer = {
-            ...symbolsLayer,
-            id: `symbols-${equityGroup}`,
-            filter: ['==', ['get', 'Equity Group'], equityGroup]
-          };
-  
-          // Remove the original layer and add the new filtered layers
-          map.setLayoutProperty('symbols', 'visibility', 'none');
-          map.addLayer(newLayer);
-        });
+  const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
+
+  const equityGroupColors = {
+    AEG: '#F44336', // red
+    ECP: '#4CAF50', // green
+    ESP: '#2196F3', // blue
+    BCP: '#FFC107', // amber
+    ECSP: '#9C27B0', // purple
+    WPO: '#FF5722', // deep orange
+  };
+
+  equityGroups.forEach(equityGroup => {
+    // Duplicate the symbol layer and apply a filter for each Equity Group
+    const newLayer = {
+      ...symbolsLayer,
+      id: `symbols-${equityGroup}`,
+      filter: ['==', ['get', 'Equity Group'], equityGroup],
+      paint: {
+        ...symbolsLayer.paint,
+        'icon-color': equityGroupColors[equityGroup],
+      },
+    };
+
+    // Remove the original layer and add the new filtered layers
+    map.setLayoutProperty('symbols', 'visibility', 'none');
+    map.addLayer(newLayer);
+  });
   
         // Add the popup
         const popup = new mapboxgl.Popup({
