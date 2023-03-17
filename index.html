@@ -57,83 +57,112 @@
     </div>
     
     <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig'; 
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip', 
-      center: [0, 0],
-      zoom: 1
-    });
-
-    // Fly to the United States when the map is first loaded
-    map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
-
-    function setEquityGroupVisibility(equityGroup, isVisible) {
-      const visibility = isVisible ? 'visible' : 'none';
-      map.setLayoutProperty(`symbols-${equityGroup}`, 'visibility', visibility);
-    }
-
-    // Add event listeners for checkboxes
-    document.querySelectorAll('.equity-toggle').forEach((checkbox) => {
-      checkbox.addEventListener('change', (event) => {
-        setEquityGroupVisibility(event.target.value, event.target.checked);
-        updateEquityGroupTotals();
+      mapboxgl.accessToken = 'pk.eyJ1IjoiY29sYnlmb3giLCJhIjoiY2xlNmJhMWxyMGE5YjNvcW02dWFtbzhpeSJ9.EpanROBym2vRINMDfmysig'; 
+      const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/colbyfox/cle6m689j000301mjf1w0jfip', 
+        center: [0, 0],
+        zoom: 1
       });
+  
+      // Fly to the United States when the map is first loaded
+      map.flyTo({ center: [-95, 37], zoom: 4.2, duration: 10000 });
+  
+      function setEquityGroupVisibility(equityGroup, isVisible) {
+        const visibility = isVisible ? 'visible' : 'none';
+        map.setLayoutProperty(`symbols-${equityGroup}`, 'visibility', visibility);
+      }
+  
+      // Add event listeners for checkboxes
+      document.querySelectorAll('.equity-toggle').forEach((checkbox) => {
+        checkbox.addEventListener('change', (event) => {
+          setEquityGroupVisibility(event.target.value, event.target.checked);
+          updateEquityGroupTotals();
+        });
+      });
+  
+      function updateEquityGroupTotals() {
+        const equityGroups = ["AEG", "ECP", "ESP", "BCP", "ECSP", "WPO"];
+        const equityGroupCounts = {};
+  
+        // Initialize counts
+        equityGroups.forEach(group => {
+          equityGroupCounts[group] = 0;
+        });
+  
+        // Count occurrences of each equity group in the features
+        const layers = equityGroups.map(group => `symbols-${group}`);
+        const features = map.queryRenderedFeatures({ layers: layers });
+        features.forEach(feature => {
+          const equityGroup = feature.properties["Equity Group"];
+          if (equityGroupCounts.hasOwnProperty(equityGroup)) {
+            equityGroupCounts[equityGroup]++;
+          }
+        });
+  
+        // Update the totals on the HTML elements
+        equityGroups.forEach(group => {
+          document.getElementById(`total-${group}`).innerText = equityGroupCounts[group];
+        });
+      }
+  
+      map.on('load', () => {
+        // Get the existing symbol layer from the style
+        const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
+        
+        const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
+  
+        equityGroups.forEach(equityGroup => {
+          // Duplicate the symbol layer and apply a filter for each Equity Group
+          const newLayer = {
+            ...symbolsLayer,
+            id: `symbols-${equityGroup}`,
+            filter: ['==', ['get', 'Equity Group'], equityGroup]
+          };
+  
+          // Remove the original layer and add the new filtered layers
+          map.setLayoutProperty('symbols', 'visibility', 'none');
+          map.addLayer(newLayer);
+        });
+  
+        // Add the popup
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false
+        });
+
+     // Add event listeners for mouse events on the map
+     map.on('mouseenter', 'symbols', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const description = e.features[0].properties.description;
+
+        // Ensure that if the map is zoomed out such that multiple
+        // copies of the feature are visible, the popup appears
+        // over the copy being pointed to.
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup.setLngLat(coordinates).setHTML(description).addTo(map);
+      });
+
+      map.on('mouseleave', 'symbols', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
+      // Call the function when the map is loaded
+      updateEquityGroupTotals();
     });
 
-    function updateEquityGroupTotals() {
-  const equityGroups = ["AEG", "ECP", "ESP", "BCP", "ECSP", "WPO"];
-  const equityGroupCounts = {};
-
-  // Initialize counts
-  equityGroups.forEach(group => {
-    equityGroupCounts[group] = 0;
-  });
-
-  // Count occurrences of each equity group in the features
-  const features = map.queryRenderedFeatures({ layers: ["symbols"] });
-  features.forEach(feature => {
-    const equityGroup = feature.properties["Equity Group"];
-    if (equityGroupCounts.hasOwnProperty(equityGroup)) {
-      equityGroupCounts[equityGroup]++;
-    }
-  });
-
-  // Update the totals on the HTML elements
-  equityGroups.forEach(group => {
-    document.getElementById(`total-${group}`).innerText = equityGroupCounts[group];
-  });
-}
-
-
-map.on('load', () => {
-  // Get the existing symbol layer from the style
-  const symbolsLayer = map.getStyle().layers.find(layer => layer.id === 'symbols');
-  
-  const equityGroups = ['AEG', 'ECP', 'ESP', 'BCP', 'ECSP', 'WPO'];
-
-  equityGroups.forEach(equityGroup => {
-    // Duplicate the symbol layer and apply a filter for each Equity Group
-    const newLayer = {
-      ...symbolsLayer,
-      id: `symbols-${equityGroup}`,
-      filter: ['==', ['get', 'Equity Group'], equityGroup]
-    };
-
-    // Remove the original layer and add the new filtered layers
-    map.setLayoutProperty('symbols', 'visibility', 'none');
-    map.addLayer(newLayer);
-  });
-  
-  // Call the function when the map is loaded
-  updateEquityGroupTotals();
-});
-
-// Listen for the 'styledata' event to handle updates when the map's style changes
-map.on('idle', () => {
-  updateEquityGroupTotals();
-});
-
+    // Listen for the 'idle' event to handle updates when the map's style changes
+    map.on('idle', () => {
+      updateEquityGroupTotals();
+    });
 
     </script>
   </body>
